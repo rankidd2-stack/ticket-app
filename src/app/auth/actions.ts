@@ -35,7 +35,7 @@ export async function signUp(formData: FormData) {
     },
   });
 
-  redirect("/tickets");
+  redirect("/dashboard");
 }
 
 export async function logIn(formData: FormData) {
@@ -52,7 +52,7 @@ export async function logIn(formData: FormData) {
     throw new Error(error.message);
   }
 
-  redirect("/tickets");
+  redirect("/dashboard");
 }
 
 export async function logOut() {

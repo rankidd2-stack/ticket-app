@@ -83,3 +83,31 @@ body {
   color: var(--ink);
   font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
+
+/* Theme toggle: the old view fades out while the new one wipes in
+   left-to-right, instead of an instant flip. Skipped entirely for users
+   who prefer reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: theme-fade-out 350ms ease forwards;
+  }
+
+  ::view-transition-new(root) {
+    animation: theme-wipe-in 450ms ease forwards;
+  }
+}
+
+@keyframes theme-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes theme-wipe-in {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}

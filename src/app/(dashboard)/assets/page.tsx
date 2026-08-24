@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
 import { createAsset, updateAssetStatus } from "./actions";
 import { AssetStatus } from "@/generated/prisma/enums";
-import { AppHeader } from "@/components/AppHeader";
 import { Pill, type Tone } from "@/components/Pill";
 
 const NEXT_ASSET_STATUS: Record<AssetStatus, { label: string; next: AssetStatus }[]> = {
@@ -28,12 +27,12 @@ export default async function AssetsPage() {
   });
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-10">
-      <AppHeader title="Assets" orgName={user.organization.name} />
+    <div className="mx-auto max-w-2xl">
+      <h1 className="text-2xl font-semibold tracking-tight">Assets</h1>
 
       <form
         action={createAsset}
-        className="mt-8 flex flex-col gap-3 rounded-lg border border-border bg-surface p-5"
+        className="mt-6 flex flex-col gap-3 rounded-lg border border-border bg-surface p-5"
       >
         <input
           name="name"
@@ -98,6 +97,6 @@ export default async function AssetsPage() {
           <p className="text-sm text-ink-faint">No assets yet.</p>
         )}
       </ul>
-    </main>
+    </div>
   );
 }

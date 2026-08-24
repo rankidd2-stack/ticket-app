@@ -49,11 +49,13 @@ Synthesized from `design-references/{linear.app,stripe,notion}/DESIGN.md`, not c
 - **Color**: purple-indigo accent (blended from all three brands' near-identical primary), Linear's surface-ladder for dark mode, Stripe/Notion's warm-white for light mode. Semantic tones (`good`/`warn`/`bad`/`neutral`) drive ticket/asset status pills — see `src/components/Pill.tsx`.
 - **Shape**: rectangular 8px buttons (Notion's stance, not Linear/Stripe's pills) — reads as a tool, not a marketing page. Pills reserved for status badges only.
 - **Type**: Geist Sans + Geist Mono (already bundled by create-next-app) — the open-source substitute all three DESIGN.md files independently point to.
-- **Theme toggle**: `src/components/ThemeToggle.tsx`, rendered globally in `layout.tsx` (fixed top-right, every page — not tucked inside the authenticated nav only). Toggles a `.dark` class on `<html>`, persisted to `localStorage`. A no-flash inline script in `layout.tsx` reads the stored preference before paint.
-- Shared `src/components/AppHeader.tsx` for the authenticated pages (Tickets/Assets nav + logout) — don't duplicate header markup per page.
+- **Theme toggle**: `src/components/ThemeToggle.tsx`, rendered globally in `layout.tsx` (fixed top-right, every page). Toggles a `.dark` class on `<html>` via `document.startViewTransition` (a left-to-right wipe; instant fallback if unsupported), persisted to `localStorage`. A no-flash inline script in `layout.tsx` reads the stored preference before paint. Uses `flushSync` for the React state update inside the transition callback — the View Transitions API requires the DOM to be fully settled before the callback returns, and a plain `setState` lands on React's own tick, too late.
+- **Layout**: `src/app/(dashboard)/` is a route group (doesn't affect the URL) holding the authenticated shell — `layout.tsx` renders `Sidebar` + auth guard once for every nested page (`dashboard`, `tickets`, `assets`, `settings`), replacing the old per-page `AppHeader`. `dashboard` and `settings` are intentional skeleton pages — real nav destinations, placeholder content, to be built out next.
+- Auth pages (`login`, `signup`) are split-screen: form on the left, a decorative accent-colored panel with a dot-grid pattern on the right (hidden below `sm:`).
 
 ## Gotchas
 - After any change to `prisma/schema.prisma`, run `npx prisma generate` explicitly. `prisma migrate dev` does not always regenerate the client on its own, and a stale client throws a confusing `PrismaClientValidationError` at runtime that looks like a data bug but isn't.
+- `document.startViewTransition(...).ready` legitimately rejects with `InvalidStateError` when the tab is backgrounded/hidden — the theme still switches correctly, only the animation is skipped. Caught deliberately in `ThemeToggle.tsx`; don't "fix" this by removing the transition.
 
 ## Working style
 - Patrick is a budding programmer learning through this project. Explain changes briefly, work in small steps, confirm before architecture-level decisions.

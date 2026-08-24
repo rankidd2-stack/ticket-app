@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { createTicket, updateTicketStatus } from "./actions";
 import { Status, Priority } from "@/generated/prisma/enums";
 import { requireUser } from "@/lib/auth";
-import { AppHeader } from "@/components/AppHeader";
 import { Pill, type Tone } from "@/components/Pill";
 
 const STATUS_ACTIONS: Record<Status, { label: string; next: Status }[]> = {
@@ -44,12 +43,12 @@ export default async function TicketsPage() {
   ]);
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-10">
-      <AppHeader title="Tickets" orgName={user.organization.name} />
+    <div className="mx-auto max-w-2xl">
+      <h1 className="text-2xl font-semibold tracking-tight">Tickets</h1>
 
       <form
         action={createTicket}
-        className="mt-8 flex flex-col gap-3 rounded-lg border border-border bg-surface p-5"
+        className="mt-6 flex flex-col gap-3 rounded-lg border border-border bg-surface p-5"
       >
         <input
           name="title"
@@ -138,6 +137,6 @@ export default async function TicketsPage() {
           <p className="text-sm text-ink-faint">No tickets yet.</p>
         )}
       </ul>
-    </main>
+    </div>
   );
 }
