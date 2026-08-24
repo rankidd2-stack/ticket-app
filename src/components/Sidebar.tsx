@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logOut } from "@/app/auth/actions";
+import { ThemeToggle } from "./ThemeToggle";
 
 const NAV_ITEMS = [
   {
@@ -75,8 +76,8 @@ export function Sidebar({ orgName }: { orgName: string }) {
         })}
       </nav>
 
-      <div className="border-t border-border p-3">
-        <form action={logOut}>
+      <div className="flex items-center gap-2 border-t border-border p-3">
+        <form action={logOut} className="flex-1">
           <button
             type="submit"
             className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-ink-muted hover:bg-bg-soft hover:text-ink"
@@ -84,6 +85,7 @@ export function Sidebar({ orgName }: { orgName: string }) {
             Log out
           </button>
         </form>
+        <ThemeToggle />
       </div>
     </aside>
   );

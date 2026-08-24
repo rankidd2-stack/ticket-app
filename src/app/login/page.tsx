@@ -1,10 +1,14 @@
 import { logIn } from "@/app/auth/actions";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function LoginPage() {
   return (
     <div className="flex min-h-screen">
       <div className="flex w-full flex-col justify-center px-6 py-10 sm:w-[420px] sm:px-10">
-        <p className="text-sm font-semibold tracking-tight">Ticket App</p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold tracking-tight">Ticket App</p>
+          <ThemeToggle />
+        </div>
         <h1 className="mt-8 text-xl font-semibold tracking-tight">Log in</h1>
 
         <form action={logIn} className="mt-5 flex flex-col gap-3">
