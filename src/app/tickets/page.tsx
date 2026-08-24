@@ -1,5 +1,12 @@
 import { prisma } from "@/lib/prisma";
-import { createTicket } from "./actions";
+import { createTicket, updateTicketStatus } from "./actions";
+import { Status } from "@/generated/prisma/enums";
+
+const NEXT_STATUS: Record<Status, { label: string; next: Status }> = {
+  OPEN: { label: "Start", next: "IN_PROGRESS" },
+  IN_PROGRESS: { label: "Close", next: "CLOSED" },
+  CLOSED: { label: "Reopen", next: "OPEN" },
+};
 
 export default async function TicketsPage() {
   const tickets = await prisma.ticket.findMany({
@@ -38,20 +45,33 @@ export default async function TicketsPage() {
       </form>
 
       <ul className="mt-8 flex flex-col gap-3">
-        {tickets.map((ticket) => (
-          <li key={ticket.id} className="rounded border p-4">
-            <div className="flex items-center justify-between">
-              <span className="font-medium">{ticket.title}</span>
-              <span className="text-sm text-gray-500">
-                {ticket.status} · {ticket.priority}
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-gray-600">{ticket.description}</p>
-            <span className="mt-1 inline-block text-xs text-gray-400">
-              {ticket.category}
-            </span>
-          </li>
-        ))}
+        {tickets.map((ticket) => {
+          const { label, next } = NEXT_STATUS[ticket.status];
+          return (
+            <li key={ticket.id} className="rounded border p-4">
+              <div className="flex items-center justify-between">
+                <span className="font-medium">{ticket.title}</span>
+                <span className="text-sm text-gray-500">
+                  {ticket.status} · {ticket.priority}
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-gray-600">{ticket.description}</p>
+              <div className="mt-2 flex items-center justify-between">
+                <span className="inline-block text-xs text-gray-400">
+                  {ticket.category}
+                </span>
+                <form action={updateTicketStatus.bind(null, ticket.id, next)}>
+                  <button
+                    type="submit"
+                    className="rounded border px-3 py-1 text-sm"
+                  >
+                    {label}
+                  </button>
+                </form>
+              </div>
+            </li>
+          );
+        })}
         {tickets.length === 0 && (
           <p className="text-sm text-gray-500">No tickets yet.</p>
         )}

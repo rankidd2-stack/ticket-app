@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { Status } from "@/generated/prisma/enums";
 
 const DEMO_ORG_ID = "demo-org";
 
@@ -21,6 +22,15 @@ export async function createTicket(formData: FormData) {
       category,
       organizationId: DEMO_ORG_ID,
     },
+  });
+
+  revalidatePath("/tickets");
+}
+
+export async function updateTicketStatus(ticketId: string, status: Status) {
+  await prisma.ticket.update({
+    where: { id: ticketId },
+    data: { status },
   });
 
   revalidatePath("/tickets");
