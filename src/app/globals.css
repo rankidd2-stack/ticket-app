@@ -85,15 +85,25 @@ body {
 }
 
 /* Theme toggle: the old view fades out while the new one wipes in
-   left-to-right, instead of an instant flip. Skipped entirely for users
-   who prefer reduced motion. */
+   left-to-right, instead of an instant flip. Both run the same duration
+   and easing so they read as one motion, not two mismatched ones.
+   will-change hints the browser to composite on the GPU from frame one
+   instead of promoting mid-animation. Skipped for reduced-motion users. */
 @media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 400ms;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    animation-fill-mode: both;
+    will-change: clip-path, opacity;
+  }
+
   ::view-transition-old(root) {
-    animation: theme-fade-out 350ms ease forwards;
+    animation-name: theme-fade-out;
   }
 
   ::view-transition-new(root) {
-    animation: theme-wipe-in 450ms ease forwards;
+    animation-name: theme-wipe-in;
   }
 }
 
