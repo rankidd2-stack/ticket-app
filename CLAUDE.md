@@ -33,6 +33,9 @@ Notifications, invoicing/GCash, multi-branch locations, reporting dashboards, pe
 - Split "Solved" from "Closed" with a reopen grace period, instead of one manual Close action
 - SLA / time-to-resolution tracked as its own field, separate from status
 
+## Gotchas
+- After any change to `prisma/schema.prisma`, run `npx prisma generate` explicitly. `prisma migrate dev` does not always regenerate the client on its own, and a stale client throws a confusing `PrismaClientValidationError` at runtime that looks like a data bug but isn't.
+
 ## Working style
 - Patrick is a budding programmer learning through this project. Explain changes briefly, work in small steps, confirm before architecture-level decisions.
 - For UI work, use `../design-references/<brand>/DESIGN.md` or the `/taste` skill instead of a generic default SaaS look.
