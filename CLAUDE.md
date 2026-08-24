@@ -18,12 +18,17 @@ A generic ticket + asset tracking SaaS. The core engine is built vertical-agnost
 - **Asset** — name, type (plain text), notes
 
 ### Core flows
-1. Sign up / log in
-2. Create an organization
-3. Submit a ticket
-4. View ticket list, filter by status
-5. Update ticket status / assign it
-6. Log an asset (create, view, edit, delete)
+1. Sign up / log in — done (Supabase Auth; signup also creates the Organization)
+2. Create an organization — done (folded into signup)
+3. Submit a ticket — done
+4. View ticket list, filter by status — list done, filtering not yet
+5. Update ticket status / assign it — status done, assignment not yet
+6. Log an asset (create, view, edit, delete) — not started
+
+### Auth notes
+- Supabase Auth handles login/sessions. `User.id` in Prisma = the Supabase auth user's id (one id, not two).
+- Email confirmation is on by default — a new signup can't log in until the confirmation link is clicked. This is correct behavior, not a bug.
+- Dev and production currently point at the same Supabase project. Fine for now (just us), but separate them before real users touch this.
 
 ### Explicitly NOT in v1
 Notifications, invoicing/GCash, multi-branch locations, reporting dashboards, per-vertical custom fields, file attachments. Add one at a time after the baseline works end to end — don't build ahead of this list without discussing it first.

@@ -3,10 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { Status } from "@/generated/prisma/enums";
-
-const DEMO_ORG_ID = "demo-org";
+import { requireUser } from "@/lib/auth";
 
 export async function createTicket(formData: FormData) {
+  const user = await requireUser();
+
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const category = String(formData.get("category") ?? "").trim();
@@ -20,7 +21,7 @@ export async function createTicket(formData: FormData) {
       title,
       description,
       category,
-      organizationId: DEMO_ORG_ID,
+      organizationId: user.organizationId,
     },
   });
 
@@ -28,8 +29,12 @@ export async function createTicket(formData: FormData) {
 }
 
 export async function updateTicketStatus(ticketId: string, status: Status) {
-  await prisma.ticket.update({
-    where: { id: ticketId },
+  const user = await requireUser();
+
+  // Scope the update to the user's own organization, so no one can change
+  // a ticket that isn't theirs just by knowing its id.
+  await prisma.ticket.updateMany({
+    where: { id: ticketId, organizationId: user.organizationId },
     data: { status },
   });
 

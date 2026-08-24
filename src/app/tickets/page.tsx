@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { createTicket, updateTicketStatus } from "./actions";
 import { Status } from "@/generated/prisma/enums";
+import { requireUser } from "@/lib/auth";
+import { logOut } from "@/app/auth/actions";
 
 const STATUS_ACTIONS: Record<Status, { label: string; next: Status }[]> = {
   OPEN: [{ label: "Start", next: "IN_PROGRESS" }],
@@ -13,13 +15,25 @@ const STATUS_ACTIONS: Record<Status, { label: string; next: Status }[]> = {
 };
 
 export default async function TicketsPage() {
+  const user = await requireUser();
   const tickets = await prisma.ticket.findMany({
+    where: { organizationId: user.organizationId },
     orderBy: { createdAt: "desc" },
   });
 
   return (
     <main className="mx-auto max-w-2xl p-8">
-      <h1 className="text-2xl font-semibold">Tickets</h1>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Tickets</h1>
+          <p className="text-sm text-gray-500">{user.organization.name}</p>
+        </div>
+        <form action={logOut}>
+          <button type="submit" className="text-sm underline">
+            Log out
+          </button>
+        </form>
+      </div>
 
       <form action={createTicket} className="mt-6 flex flex-col gap-3">
         <input
