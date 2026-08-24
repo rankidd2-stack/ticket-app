@@ -11,10 +11,19 @@ export async function createTicket(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const category = String(formData.get("category") ?? "").trim();
+  const assetId = String(formData.get("assetId") ?? "").trim() || null;
 
   if (!title || !description || !category) {
     throw new Error("Title, description, and category are required.");
   }
+
+  // Only attach the asset if it actually belongs to this org — never trust
+  // an id submitted from the client without checking.
+  const asset = assetId
+    ? await prisma.asset.findFirst({
+        where: { id: assetId, organizationId: user.organizationId },
+      })
+    : null;
 
   await prisma.ticket.create({
     data: {
@@ -22,6 +31,7 @@ export async function createTicket(formData: FormData) {
       description,
       category,
       organizationId: user.organizationId,
+      assetId: asset?.id,
     },
   });
 

@@ -15,7 +15,7 @@ A generic ticket + asset tracking SaaS. The core engine is built vertical-agnost
 - **Organization** — the tenant/customer account
 - **User** — belongs to an Organization, role: admin or member
 - **Ticket** — title, description, category (plain text), priority, status, assignee, timestamps
-- **Asset** — name, type (plain text), notes
+- **Asset** — name, type (plain text), notes, status (Operational / Down / Retired), optionally linked to tickets
 
 ### Core flows
 1. Sign up / log in — done (Supabase Auth; signup also creates the Organization)
@@ -23,7 +23,7 @@ A generic ticket + asset tracking SaaS. The core engine is built vertical-agnost
 3. Submit a ticket — done
 4. View ticket list, filter by status — list done, filtering not yet
 5. Update ticket status / assign it — status done, assignment not yet
-6. Log an asset (create, view, edit, delete) — not started
+6. Log an asset (create, view, edit, delete) — create/view/status done, edit/delete not yet
 
 ### Auth notes
 - Supabase Auth handles login/sessions. `User.id` in Prisma = the Supabase auth user's id (one id, not two).
@@ -37,6 +37,12 @@ Notifications, invoicing/GCash, multi-branch locations, reporting dashboards, pe
 - Auto-transitions on events, not just manual buttons (e.g. assigning a ticket auto-moves it to In Progress; a reply auto-reopens it)
 - Split "Solved" from "Closed" with a reopen grace period, instead of one manual Close action
 - SLA / time-to-resolution tracked as its own field, separate from status
+
+### Asset patterns noted for later (from UpKeep / Fiix / Snipe-IT research, 2026-08-24)
+- Parent/child asset hierarchy (a big asset made of trackable sub-components)
+- Asset criticality scoring, to prioritize maintenance by impact
+- Unique barcode-style asset tags, for physical scanning workflows
+- Check-in/check-out to a specific person, separate from status (who has it, not just what condition it's in)
 
 ## Gotchas
 - After any change to `prisma/schema.prisma`, run `npx prisma generate` explicitly. `prisma migrate dev` does not always regenerate the client on its own, and a stale client throws a confusing `PrismaClientValidationError` at runtime that looks like a data bug but isn't.

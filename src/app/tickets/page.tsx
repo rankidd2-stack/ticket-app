@@ -16,10 +16,17 @@ const STATUS_ACTIONS: Record<Status, { label: string; next: Status }[]> = {
 
 export default async function TicketsPage() {
   const user = await requireUser();
-  const tickets = await prisma.ticket.findMany({
-    where: { organizationId: user.organizationId },
-    orderBy: { createdAt: "desc" },
-  });
+  const [tickets, assets] = await Promise.all([
+    prisma.ticket.findMany({
+      where: { organizationId: user.organizationId },
+      orderBy: { createdAt: "desc" },
+      include: { asset: true },
+    }),
+    prisma.asset.findMany({
+      where: { organizationId: user.organizationId },
+      orderBy: { name: "asc" },
+    }),
+  ]);
 
   return (
     <main className="mx-auto max-w-2xl p-8">
@@ -28,11 +35,16 @@ export default async function TicketsPage() {
           <h1 className="text-2xl font-semibold">Tickets</h1>
           <p className="text-sm text-gray-500">{user.organization.name}</p>
         </div>
-        <form action={logOut}>
-          <button type="submit" className="text-sm underline">
-            Log out
-          </button>
-        </form>
+        <div className="flex items-center gap-4">
+          <a href="/assets" className="text-sm underline">
+            Assets
+          </a>
+          <form action={logOut}>
+            <button type="submit" className="text-sm underline">
+              Log out
+            </button>
+          </form>
+        </div>
       </div>
 
       <form action={createTicket} className="mt-6 flex flex-col gap-3">
@@ -54,6 +66,14 @@ export default async function TicketsPage() {
           required
           className="rounded border px-3 py-2"
         />
+        <select name="assetId" className="rounded border px-3 py-2">
+          <option value="">No asset</option>
+          {assets.map((asset) => (
+            <option key={asset.id} value={asset.id}>
+              {asset.name}
+            </option>
+          ))}
+        </select>
         <button
           type="submit"
           className="rounded bg-black px-4 py-2 text-white"
@@ -77,6 +97,7 @@ export default async function TicketsPage() {
               <div className="mt-2 flex items-center justify-between">
                 <span className="inline-block text-xs text-gray-400">
                   {ticket.category}
+                  {ticket.asset && ` · ${ticket.asset.name}`}
                 </span>
                 <div className="flex gap-2">
                   {actions.map(({ label, next }) => (

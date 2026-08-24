@@ -69,15 +69,27 @@ model Ticket {
 
   assignee   User?   @relation("AssignedTickets", fields: [assigneeId], references: [id])
   assigneeId String?
+
+  asset   Asset?  @relation(fields: [assetId], references: [id])
+  assetId String?
+}
+
+enum AssetStatus {
+  OPERATIONAL
+  DOWN
+  RETIRED
 }
 
 model Asset {
-  id        String   @id @default(cuid())
+  id        String      @id @default(cuid())
   name      String
   type      String
   notes     String?
-  createdAt DateTime @default(now())
+  status    AssetStatus @default(OPERATIONAL)
+  createdAt DateTime    @default(now())
 
   organization   Organization @relation(fields: [organizationId], references: [id])
   organizationId String
+
+  tickets Ticket[]
 }
