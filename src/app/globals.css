@@ -84,32 +84,20 @@ body {
   font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* Theme toggle: the old view fades out while the new one wipes in
-   left-to-right, instead of an instant flip. Both run the same duration
-   and easing so they read as one motion, not two mismatched ones.
-   will-change hints the browser to composite on the GPU from frame one
-   instead of promoting mid-animation. Skipped for reduced-motion users. */
+/* Theme toggle: the new view wipes in left-to-right over the old one,
+   instead of an instant flip. Only one property (clip-path) animates —
+   the old view previously also cross-faded, which meant compositing two
+   full-screen animated layers at once instead of one. Dropping that
+   redundant layer, plus a shorter duration, reads noticeably smoother.
+   Skipped for reduced-motion users. */
 @media (prefers-reduced-motion: no-preference) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 400ms;
-    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    animation-fill-mode: both;
-    will-change: clip-path, opacity;
-  }
-
   ::view-transition-old(root) {
-    animation-name: theme-fade-out;
+    animation: none;
   }
 
   ::view-transition-new(root) {
-    animation-name: theme-wipe-in;
-  }
-}
-
-@keyframes theme-fade-out {
-  to {
-    opacity: 0;
+    animation: theme-wipe-in 280ms cubic-bezier(0.4, 0, 0.2, 1) both;
+    will-change: clip-path;
   }
 }
 
