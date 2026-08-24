@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { createTicket, updateTicketStatus } from "./actions";
-import { Status } from "@/generated/prisma/enums";
+import { Status, Priority } from "@/generated/prisma/enums";
 import { requireUser } from "@/lib/auth";
-import { logOut } from "@/app/auth/actions";
+import { AppHeader } from "@/components/AppHeader";
+import { Pill, type Tone } from "@/components/Pill";
 
 const STATUS_ACTIONS: Record<Status, { label: string; next: Status }[]> = {
   OPEN: [{ label: "Start", next: "IN_PROGRESS" }],
@@ -12,6 +13,20 @@ const STATUS_ACTIONS: Record<Status, { label: string; next: Status }[]> = {
   ],
   ON_HOLD: [{ label: "Resume", next: "IN_PROGRESS" }],
   CLOSED: [{ label: "Reopen", next: "OPEN" }],
+};
+
+const STATUS_TONE: Record<Status, Tone> = {
+  OPEN: "neutral",
+  IN_PROGRESS: "accent",
+  ON_HOLD: "warn",
+  CLOSED: "good",
+};
+
+const PRIORITY_TONE: Record<Priority, Tone> = {
+  LOW: "neutral",
+  MEDIUM: "neutral",
+  HIGH: "warn",
+  URGENT: "bad",
 };
 
 export default async function TicketsPage() {
@@ -29,44 +44,35 @@ export default async function TicketsPage() {
   ]);
 
   return (
-    <main className="mx-auto max-w-2xl p-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Tickets</h1>
-          <p className="text-sm text-gray-500">{user.organization.name}</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <a href="/assets" className="text-sm underline">
-            Assets
-          </a>
-          <form action={logOut}>
-            <button type="submit" className="text-sm underline">
-              Log out
-            </button>
-          </form>
-        </div>
-      </div>
+    <main className="mx-auto max-w-2xl px-6 py-10">
+      <AppHeader title="Tickets" orgName={user.organization.name} />
 
-      <form action={createTicket} className="mt-6 flex flex-col gap-3">
+      <form
+        action={createTicket}
+        className="mt-8 flex flex-col gap-3 rounded-lg border border-border bg-surface p-5"
+      >
         <input
           name="title"
           placeholder="Title"
           required
-          className="rounded border px-3 py-2"
+          className="rounded-md border border-border bg-bg px-3 py-2 text-sm placeholder:text-ink-faint focus:border-accent focus:outline-none"
         />
         <textarea
           name="description"
           placeholder="Description"
           required
-          className="rounded border px-3 py-2"
+          className="rounded-md border border-border bg-bg px-3 py-2 text-sm placeholder:text-ink-faint focus:border-accent focus:outline-none"
         />
         <input
           name="category"
           placeholder="Category (e.g. IT, Facilities)"
           required
-          className="rounded border px-3 py-2"
+          className="rounded-md border border-border bg-bg px-3 py-2 text-sm placeholder:text-ink-faint focus:border-accent focus:outline-none"
         />
-        <select name="assetId" className="rounded border px-3 py-2">
+        <select
+          name="assetId"
+          className="rounded-md border border-border bg-bg px-3 py-2 text-sm focus:border-accent focus:outline-none"
+        >
           <option value="">No asset</option>
           {assets.map((asset) => (
             <option key={asset.id} value={asset.id}>
@@ -76,26 +82,36 @@ export default async function TicketsPage() {
         </select>
         <button
           type="submit"
-          className="rounded bg-black px-4 py-2 text-white"
+          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-ink hover:bg-accent-hover"
         >
           Submit ticket
         </button>
       </form>
 
-      <ul className="mt-8 flex flex-col gap-3">
+      <ul className="mt-6 flex flex-col gap-3">
         {tickets.map((ticket) => {
           const actions = STATUS_ACTIONS[ticket.status];
           return (
-            <li key={ticket.id} className="rounded border p-4">
-              <div className="flex items-center justify-between">
+            <li
+              key={ticket.id}
+              className="rounded-lg border border-border bg-surface p-4"
+            >
+              <div className="flex items-center justify-between gap-3">
                 <span className="font-medium">{ticket.title}</span>
-                <span className="text-sm text-gray-500">
-                  {ticket.status} · {ticket.priority}
-                </span>
+                <div className="flex shrink-0 gap-1.5">
+                  <Pill tone={STATUS_TONE[ticket.status]}>
+                    {ticket.status.replace("_", " ")}
+                  </Pill>
+                  <Pill tone={PRIORITY_TONE[ticket.priority]}>
+                    {ticket.priority}
+                  </Pill>
+                </div>
               </div>
-              <p className="mt-1 text-sm text-gray-600">{ticket.description}</p>
-              <div className="mt-2 flex items-center justify-between">
-                <span className="inline-block text-xs text-gray-400">
+              <p className="mt-1 text-sm text-ink-muted">
+                {ticket.description}
+              </p>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-xs text-ink-faint">
                   {ticket.category}
                   {ticket.asset && ` · ${ticket.asset.name}`}
                 </span>
@@ -107,7 +123,7 @@ export default async function TicketsPage() {
                     >
                       <button
                         type="submit"
-                        className="rounded border px-3 py-1 text-sm"
+                        className="rounded-md border border-border px-3 py-1 text-sm text-ink-muted hover:text-ink"
                       >
                         {label}
                       </button>
@@ -119,7 +135,7 @@ export default async function TicketsPage() {
           );
         })}
         {tickets.length === 0 && (
-          <p className="text-sm text-gray-500">No tickets yet.</p>
+          <p className="text-sm text-ink-faint">No tickets yet.</p>
         )}
       </ul>
     </main>

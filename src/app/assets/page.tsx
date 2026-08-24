@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
 import { createAsset, updateAssetStatus } from "./actions";
 import { AssetStatus } from "@/generated/prisma/enums";
+import { AppHeader } from "@/components/AppHeader";
+import { Pill, type Tone } from "@/components/Pill";
 
 const NEXT_ASSET_STATUS: Record<AssetStatus, { label: string; next: AssetStatus }[]> = {
   OPERATIONAL: [{ label: "Mark down", next: "DOWN" }],
@@ -12,6 +14,12 @@ const NEXT_ASSET_STATUS: Record<AssetStatus, { label: string; next: AssetStatus 
   RETIRED: [{ label: "Reinstate", next: "OPERATIONAL" }],
 };
 
+const STATUS_TONE: Record<AssetStatus, Tone> = {
+  OPERATIONAL: "good",
+  DOWN: "bad",
+  RETIRED: "neutral",
+};
+
 export default async function AssetsPage() {
   const user = await requireUser();
   const assets = await prisma.asset.findMany({
@@ -20,54 +28,55 @@ export default async function AssetsPage() {
   });
 
   return (
-    <main className="mx-auto max-w-2xl p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Assets</h1>
-        <a href="/tickets" className="text-sm underline">
-          Tickets
-        </a>
-      </div>
+    <main className="mx-auto max-w-2xl px-6 py-10">
+      <AppHeader title="Assets" orgName={user.organization.name} />
 
-      <form action={createAsset} className="mt-6 flex flex-col gap-3">
+      <form
+        action={createAsset}
+        className="mt-8 flex flex-col gap-3 rounded-lg border border-border bg-surface p-5"
+      >
         <input
           name="name"
           placeholder="Name (e.g. Lobby AC Unit)"
           required
-          className="rounded border px-3 py-2"
+          className="rounded-md border border-border bg-bg px-3 py-2 text-sm placeholder:text-ink-faint focus:border-accent focus:outline-none"
         />
         <input
           name="type"
           placeholder="Type (e.g. HVAC, Laptop, Vehicle)"
           required
-          className="rounded border px-3 py-2"
+          className="rounded-md border border-border bg-bg px-3 py-2 text-sm placeholder:text-ink-faint focus:border-accent focus:outline-none"
         />
         <input
           name="notes"
           placeholder="Notes (optional)"
-          className="rounded border px-3 py-2"
+          className="rounded-md border border-border bg-bg px-3 py-2 text-sm placeholder:text-ink-faint focus:border-accent focus:outline-none"
         />
         <button
           type="submit"
-          className="rounded bg-black px-4 py-2 text-white"
+          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-ink hover:bg-accent-hover"
         >
           Add asset
         </button>
       </form>
 
-      <ul className="mt-8 flex flex-col gap-3">
+      <ul className="mt-6 flex flex-col gap-3">
         {assets.map((asset) => {
           const actions = NEXT_ASSET_STATUS[asset.status];
           return (
-            <li key={asset.id} className="rounded border p-4">
-              <div className="flex items-center justify-between">
+            <li
+              key={asset.id}
+              className="rounded-lg border border-border bg-surface p-4"
+            >
+              <div className="flex items-center justify-between gap-3">
                 <span className="font-medium">{asset.name}</span>
-                <span className="text-sm text-gray-500">{asset.status}</span>
+                <Pill tone={STATUS_TONE[asset.status]}>{asset.status}</Pill>
               </div>
-              <p className="mt-1 text-xs text-gray-400">{asset.type}</p>
+              <p className="mt-1 text-xs text-ink-faint">{asset.type}</p>
               {asset.notes && (
-                <p className="mt-1 text-sm text-gray-600">{asset.notes}</p>
+                <p className="mt-1 text-sm text-ink-muted">{asset.notes}</p>
               )}
-              <div className="mt-2 flex gap-2">
+              <div className="mt-3 flex gap-2">
                 {actions.map(({ label, next }) => (
                   <form
                     key={label}
@@ -75,7 +84,7 @@ export default async function AssetsPage() {
                   >
                     <button
                       type="submit"
-                      className="rounded border px-3 py-1 text-sm"
+                      className="rounded-md border border-border px-3 py-1 text-sm text-ink-muted hover:text-ink"
                     >
                       {label}
                     </button>
@@ -86,7 +95,7 @@ export default async function AssetsPage() {
           );
         })}
         {assets.length === 0 && (
-          <p className="text-sm text-gray-500">No assets yet.</p>
+          <p className="text-sm text-ink-faint">No assets yet.</p>
         )}
       </ul>
     </main>
