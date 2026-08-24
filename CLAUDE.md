@@ -28,6 +28,11 @@ A generic ticket + asset tracking SaaS. The core engine is built vertical-agnost
 ### Explicitly NOT in v1
 Notifications, invoicing/GCash, multi-branch locations, reporting dashboards, per-vertical custom fields, file attachments. Add one at a time after the baseline works end to end — don't build ahead of this list without discussing it first.
 
+### Workflow patterns noted for later (from Zendesk / Jira Service Management / MaintainX research, 2026-08-24)
+- Auto-transitions on events, not just manual buttons (e.g. assigning a ticket auto-moves it to In Progress; a reply auto-reopens it)
+- Split "Solved" from "Closed" with a reopen grace period, instead of one manual Close action
+- SLA / time-to-resolution tracked as its own field, separate from status
+
 ## Working style
 - Patrick is a budding programmer learning through this project. Explain changes briefly, work in small steps, confirm before architecture-level decisions.
 - For UI work, use `../design-references/<brand>/DESIGN.md` or the `/taste` skill instead of a generic default SaaS look.

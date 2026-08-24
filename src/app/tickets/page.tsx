@@ -2,10 +2,14 @@ import { prisma } from "@/lib/prisma";
 import { createTicket, updateTicketStatus } from "./actions";
 import { Status } from "@/generated/prisma/enums";
 
-const NEXT_STATUS: Record<Status, { label: string; next: Status }> = {
-  OPEN: { label: "Start", next: "IN_PROGRESS" },
-  IN_PROGRESS: { label: "Close", next: "CLOSED" },
-  CLOSED: { label: "Reopen", next: "OPEN" },
+const STATUS_ACTIONS: Record<Status, { label: string; next: Status }[]> = {
+  OPEN: [{ label: "Start", next: "IN_PROGRESS" }],
+  IN_PROGRESS: [
+    { label: "Hold", next: "ON_HOLD" },
+    { label: "Close", next: "CLOSED" },
+  ],
+  ON_HOLD: [{ label: "Resume", next: "IN_PROGRESS" }],
+  CLOSED: [{ label: "Reopen", next: "OPEN" }],
 };
 
 export default async function TicketsPage() {
@@ -46,7 +50,7 @@ export default async function TicketsPage() {
 
       <ul className="mt-8 flex flex-col gap-3">
         {tickets.map((ticket) => {
-          const { label, next } = NEXT_STATUS[ticket.status];
+          const actions = STATUS_ACTIONS[ticket.status];
           return (
             <li key={ticket.id} className="rounded border p-4">
               <div className="flex items-center justify-between">
@@ -60,14 +64,21 @@ export default async function TicketsPage() {
                 <span className="inline-block text-xs text-gray-400">
                   {ticket.category}
                 </span>
-                <form action={updateTicketStatus.bind(null, ticket.id, next)}>
-                  <button
-                    type="submit"
-                    className="rounded border px-3 py-1 text-sm"
-                  >
-                    {label}
-                  </button>
-                </form>
+                <div className="flex gap-2">
+                  {actions.map(({ label, next }) => (
+                    <form
+                      key={label}
+                      action={updateTicketStatus.bind(null, ticket.id, next)}
+                    >
+                      <button
+                        type="submit"
+                        className="rounded border px-3 py-1 text-sm"
+                      >
+                        {label}
+                      </button>
+                    </form>
+                  ))}
+                </div>
               </div>
             </li>
           );
